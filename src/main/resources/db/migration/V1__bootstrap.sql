@@ -58,7 +58,9 @@ CREATE TABLE vehicle_auction (
   base_price int(11) NOT NULL,
   final_price int(11),
   status enum('IN_PROGRESS','CANCELLED','COMPLETED','NOT_STARTED') NOT NULL DEFAULT 'NOT_STARTED',
+  auction_duration_hr int(4) NOT NULL,
   auction_start_time timestamp NULL DEFAULT NULL,
+  auction_end_time timestamp NULL DEFAULT NULL,
   created_time timestamp NULL DEFAULT NULL,
   modified_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT account_id_auction FOREIGN KEY (account_id) REFERENCES account (id),
@@ -70,13 +72,16 @@ CREATE TABLE vehicle_auction_history (
   account_id int(11) NOT NULL,
   vehicle_id int(11) NOT NULL,
   vehicle_auction_id int(11) NOT NULL,
+  vin varchar(127) DEFAULT NULL,
   base_price int(11) NOT NULL,
   auction_price int(11),
   created_time timestamp NULL DEFAULT NULL,
   modified_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT account_id_history FOREIGN KEY (account_id) REFERENCES account (id),
   CONSTRAINT vehicle_id_history FOREIGN KEY (vehicle_id) REFERENCES vehicle (id),
-  CONSTRAINT vehicle_auction_id_history FOREIGN KEY (vehicle_auction_id) REFERENCES vehicle_auction (id)
+  CONSTRAINT vehicle_auction_id_history FOREIGN KEY (vehicle_auction_id) REFERENCES vehicle_auction (id),
+  CONSTRAINT vehicle_auction_id_history_vin FOREIGN KEY (vin) REFERENCES vehicle (vin),
+  KEY vin (vin)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 
