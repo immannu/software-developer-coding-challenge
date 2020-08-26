@@ -36,6 +36,7 @@ CREATE TABLE vehicle (
   model varchar(20) DEFAULT NULL,
   trim varchar(20) DEFAULT NULL,
   vin varchar(127) DEFAULT NULL,
+  vehicle_value int(7) DEFAULT 0,
   created_time timestamp NULL DEFAULT NULL,
   modified_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   KEY vin (vin)

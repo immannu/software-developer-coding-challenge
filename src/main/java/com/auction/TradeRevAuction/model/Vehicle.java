@@ -43,4 +43,7 @@ public class Vehicle extends BaseEnity{
 
   @Column(name = "vin")
   private String vin;
+
+  @Column(name = "vehicle_value")
+  private int vehicleValue;
 }
