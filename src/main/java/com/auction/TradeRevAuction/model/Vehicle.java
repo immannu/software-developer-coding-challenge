@@ -8,10 +8,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 
 @Data
@@ -46,4 +49,9 @@ public class Vehicle extends BaseEnity{
 
   @Column(name = "vehicle_value")
   private int vehicleValue;
+
+  @OneToOne(fetch = FetchType.LAZY,
+      cascade =  CascadeType.ALL,
+      mappedBy = "vehicle")
+  private VehicleAccount vehicleAccount;
 }

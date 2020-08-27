@@ -8,12 +8,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 
 @Data
@@ -24,7 +30,7 @@ import javax.persistence.Id;
 @ToString
 @Builder(toBuilder = true)
 @Entity(name ="account")
-public class Account extends BaseEnity{
+public class Account extends BaseEnity implements Serializable {
 
   @Id
   @GeneratedValue
@@ -52,5 +58,10 @@ public class Account extends BaseEnity{
 
   @Column(name = "deleted")
   private boolean deleted;
+
+  @OneToMany(fetch = FetchType.LAZY,
+      cascade =  CascadeType.ALL,
+      mappedBy = "account")
+  private List<VehicleAccount> vehicles;
 
 }

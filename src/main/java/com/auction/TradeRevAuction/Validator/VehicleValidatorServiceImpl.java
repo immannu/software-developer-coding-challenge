@@ -8,11 +8,10 @@ import java.util.SplittableRandom;
 // this will be Service used to validate vehicle title , validation using
 // any third party Service Providers
 
-public class VehicleValidatorServiceImpl implements VehicleValidatorService{
+public class VehicleValidatorServiceImpl {
 
-  Logger logger = LoggerFactory.getLogger(VehicleValidatorServiceImpl.class);
-  @Override
-  public void validateByVin(String vinNo) throws Exception{
+  static Logger logger = LoggerFactory.getLogger(VehicleValidatorServiceImpl.class);
+  public static void validateByVin(String vinNo) throws Exception{
     logger.info("Validating Vehicle with vin: ${vinNo} ");
 
     //mock third part service behavior
@@ -24,8 +23,7 @@ public class VehicleValidatorServiceImpl implements VehicleValidatorService{
     logger.info("Finished Vehicle validation with vin: ${vinNo} and no issue found");
   }
 
-  @Override
-  public void validateByYearMakeModel(Vehicle vehicle) {
+  public static void validateByYearMakeModel(Vehicle vehicle) {
 
     logger.info("Validating Vehicle with Vehicle: ${vehicle} ");
 
@@ -34,8 +32,7 @@ public class VehicleValidatorServiceImpl implements VehicleValidatorService{
     logger.info("Finished Vehicle validation with Vehicle: ${vehicle} and no issue found");
   }
 
-  @Override
-  public int getVehicleValueByVin(String vinNo) {
+  public static int getVehicleValueByVin(String vinNo) {
     //call 3rd part service provider to get Vehicle valuation
     logger.info("Computing  Value of Vehicle with vin: ${vinNo} ");
     int n = new SplittableRandom().nextInt(7000, 50_001);
@@ -43,8 +40,7 @@ public class VehicleValidatorServiceImpl implements VehicleValidatorService{
     return n;
   }
 
-  @Override
-  public int getVehicleValue(Vehicle vehicle) {
+  public static int getVehicleValue(Vehicle vehicle) {
     //call 3rd part service provider to get Vehicle valuation
     logger.info("Computing  Value of Vehicle with Vehicle: ${vehicle} ");
     int n = new SplittableRandom().nextInt(7000, 50_001);

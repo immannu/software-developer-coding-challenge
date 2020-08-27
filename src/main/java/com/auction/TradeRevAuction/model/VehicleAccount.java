@@ -8,12 +8,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 
 
 @Data
@@ -23,18 +25,26 @@ import javax.persistence.Id;
 @Setter
 @ToString
 @Builder(toBuilder = true)
-@Entity(name ="account")
-public class VehicleAccount extends BaseEnity{
+@Entity(name ="vehicle_account")
+public class VehicleAccount extends BaseEnity implements Serializable {
 
   @Id
   @GeneratedValue
   @Column(name = "id", updatable = false, nullable = false)
   private int id;
 
-  @Column(name = "account_id")
-  private int accountId;
+//  @Column(name = "account_id",insertable = false,updatable = false)
+//  private int accountId;
+//
+//  @Column(name = "vehicle_id",insertable = false,updatable = false)
+//  private int vehicleId;
 
-  @Column(name = "vehicle_id")
-  private int vehicleId;
+  @OneToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "account_id", nullable = false)
+  private Account account;
+
+  @OneToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "vehicle_id", nullable = false)
+  private Vehicle vehicle;
 
 }

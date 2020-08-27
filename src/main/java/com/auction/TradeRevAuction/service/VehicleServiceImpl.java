@@ -19,14 +19,12 @@ public class VehicleServiceImpl implements VehicleService{
   private final AccountRepository accountRepositoryRepository;
   private final VehicleRepository vehicleRepository;
   private final VehicleAccountRepository vehicleAccRepository;
-  private final VehicleValidatorServiceImpl vehicleValidator;
 
   public VehicleServiceImpl(AccountRepository accountRepositoryRepository, VehicleRepository vehicleRepository,
-                            VehicleAccountRepository vehicleAccRepository, VehicleValidatorServiceImpl vehicleValidator) {
+                            VehicleAccountRepository vehicleAccRepository) {
     this.accountRepositoryRepository = accountRepositoryRepository;
     this.vehicleRepository = vehicleRepository;
     this.vehicleAccRepository = vehicleAccRepository;
-    this.vehicleValidator = vehicleValidator;
   }
 
   @Override
@@ -42,11 +40,13 @@ public class VehicleServiceImpl implements VehicleService{
                                     .model(vehicle.getModel())
                                     .trim(vehicle.getTrim())
                                     .vin(vehicle.getVin())
-                                    .vehicleValue(this.vehicleValidator.getVehicleValueByVin(vehicle.getVin()))
+                                    .vehicleValue(VehicleValidatorServiceImpl.getVehicleValueByVin(vehicle.getVin()))
                                     .build();
 
     Vehicle v = this.vehicleRepository.save(valuedVehicle);
-    VehicleAccount vAcc = this.vehicleAccRepository.save(VehicleAccount.builder().accountId(accountId).vehicleId(valuedVehicle.getId()).build());
+    VehicleAccount vAcc = this.vehicleAccRepository.save(VehicleAccount.builder()
+                          .account(value.get())
+                          .vehicle(v).build());
 
     return valuedVehicle;
   }
@@ -69,7 +69,7 @@ public class VehicleServiceImpl implements VehicleService{
       throw new NotFoundException("Account with ${id} doesnt exist");
     VehicleAccount vAcc = this.vehicleAccRepository.findByVehicleId(vehicleId);
 
-    if(accountId!= vAcc.getAccountId()){
+    if(accountId!= vAcc.getAccount().getId()){
       throw new IllegalArgumentException("Vehicle with ${vehicleId} doest belong to Account with ${accountId}");
     }
 
