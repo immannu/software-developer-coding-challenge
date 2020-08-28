@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VehicleAuctionHistoryRepository extends JpaRepository<VehicleAuctionHistory, Integer> {
+  VehicleAuctionHistory getVehicleAuctionHistoryByVehAuc_Id(int vehicleId);
+  VehicleAuctionHistory getVehicleAuctionHistoryByVehAuc_IdOrderByAuctionPriceDesc(int vehicleId);
+
 }

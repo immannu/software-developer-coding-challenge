@@ -10,7 +10,6 @@ import java.util.List;
 public interface VehicleAccountRepository extends JpaRepository<VehicleAccount, Integer> {
 
   List<VehicleAccount> findByAccountId(int accountId);
-
   VehicleAccount findByVehicleId(int vehicleId);
 
 }
