@@ -1,5 +1,6 @@
 package com.auction.TradeRevAuction.Validator;
 
+import com.auction.TradeRevAuction.Exception.AuctionException;
 import com.auction.TradeRevAuction.model.Vehicle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,13 +12,13 @@ import java.util.SplittableRandom;
 public class VehicleValidatorServiceImpl {
 
   static Logger logger = LoggerFactory.getLogger(VehicleValidatorServiceImpl.class);
-  public static void validateByVin(String vinNo) throws Exception{
+  public static void validateByVin(String vinNo) throws AuctionException{
     logger.info("Validating Vehicle with vin: ${vinNo} ");
 
     //mock third part service behavior
 
     if(vinNo.startsWith("STOLEN")){
-      throw new Exception(" Vehicle with vin: ${vinNo} is stolen");
+      throw new AuctionException(" Vehicle with vin: ${vinNo} is stolen");
     }
 
     logger.info("Finished Vehicle validation with vin: ${vinNo} and no issue found");

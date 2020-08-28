@@ -1,5 +1,7 @@
 package com.auction.TradeRevAuction.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,12 +10,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
+import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 
@@ -25,10 +31,11 @@ import javax.persistence.OneToOne;
 @ToString
 @Builder(toBuilder = true)
 @Entity(name ="vehicle")
-public class Vehicle extends BaseEnity{
+@JsonIgnoreProperties(ignoreUnknown=true)
+public class Vehicle extends BaseEnity implements Serializable {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", updatable = false, nullable = false)
   private int id;
 
@@ -50,8 +57,21 @@ public class Vehicle extends BaseEnity{
   @Column(name = "vehicle_value")
   private int vehicleValue;
 
-  @OneToOne(fetch = FetchType.LAZY,
+  @OneToOne(fetch = FetchType.EAGER,
       cascade =  CascadeType.ALL,
       mappedBy = "vehicle")
+  @JsonIgnore
   private VehicleAccount vehicleAccount;
+
+  @OneToOne(fetch = FetchType.EAGER,
+      cascade =  CascadeType.ALL,
+      mappedBy = "aucVehicle")
+  @JsonIgnore
+  private VehicleAuction vehicleAuction;
+
+  @OneToMany(fetch = FetchType.LAZY,
+      cascade =  CascadeType.ALL,
+      mappedBy = "veh",orphanRemoval = true)
+  @JsonIgnore
+  private List<VehicleAuctionHistory> vehicleAuctionHistories;
 }

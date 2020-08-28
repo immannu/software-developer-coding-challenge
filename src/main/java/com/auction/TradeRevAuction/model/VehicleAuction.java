@@ -1,5 +1,6 @@
 package com.auction.TradeRevAuction.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,10 +10,16 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.sql.Timestamp;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 
 @Data
@@ -30,11 +37,11 @@ public class VehicleAuction extends BaseEnity{
   @Column(name = "id", updatable = false, nullable = false)
   private int id;
 
-  @Column(name = "account_id")
-  private int accountId;
-
-  @Column(name = "vehicle_id")
-  private int vehicleId;
+//  @Column(name = "account_id")
+//  private int accountId;
+//
+//  @Column(name = "vehicle_id")
+//  private int vehicleId;
 
   @Column(name = "base_price")
   private int basePrice;
@@ -53,4 +60,20 @@ public class VehicleAuction extends BaseEnity{
 
   @Column(name = "auction_end_time")
   private Timestamp auctionEndTime;
+
+  @OneToOne(fetch = FetchType.LAZY, optional = true)
+  @JoinColumn(name = "account_id", nullable = true)
+  @JsonIgnore
+  private Account accountVal;
+
+  @OneToOne(fetch = FetchType.LAZY, optional = true)
+  @JoinColumn(name = "vehicle_id", nullable = true)
+  @JsonIgnore
+  private Vehicle aucVehicle;
+
+  @OneToMany(fetch = FetchType.LAZY,
+      cascade =  CascadeType.ALL,
+      mappedBy = "vehAuc",orphanRemoval = true)
+  @JsonIgnore
+  private List<VehicleAuctionHistory> vehicleAuctionHistories;
 }

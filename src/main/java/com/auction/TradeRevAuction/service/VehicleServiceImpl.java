@@ -8,6 +8,8 @@ import com.auction.TradeRevAuction.repository.AccountRepository;
 import com.auction.TradeRevAuction.repository.VehicleAccountRepository;
 import com.auction.TradeRevAuction.repository.VehicleRepository;
 import javassist.NotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +21,7 @@ public class VehicleServiceImpl implements VehicleService{
   private final AccountRepository accountRepositoryRepository;
   private final VehicleRepository vehicleRepository;
   private final VehicleAccountRepository vehicleAccRepository;
+
 
   public VehicleServiceImpl(AccountRepository accountRepositoryRepository, VehicleRepository vehicleRepository,
                             VehicleAccountRepository vehicleAccRepository) {

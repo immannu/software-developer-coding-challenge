@@ -1,5 +1,6 @@
 package com.auction.TradeRevAuction.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -33,7 +35,7 @@ import javax.persistence.OneToOne;
 public class Account extends BaseEnity implements Serializable {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", updatable = false, nullable = false)
   private int id;
 
@@ -61,7 +63,20 @@ public class Account extends BaseEnity implements Serializable {
 
   @OneToMany(fetch = FetchType.LAZY,
       cascade =  CascadeType.ALL,
-      mappedBy = "account")
+      mappedBy = "account",orphanRemoval = true)
+  @JsonIgnore
   private List<VehicleAccount> vehicles;
+
+  @OneToMany(fetch = FetchType.LAZY,
+      cascade =  CascadeType.ALL,
+      mappedBy = "accountVal",orphanRemoval = true)
+  @JsonIgnore
+  private List<VehicleAuction> vehicleAuctions;
+
+  @OneToMany(fetch = FetchType.LAZY,
+      cascade =  CascadeType.ALL,
+      mappedBy = "acc",orphanRemoval = true)
+  @JsonIgnore
+  private List<VehicleAuctionHistory> vehicleAuctionHistories;
 
 }
