@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface VehicleAuctionService {
 
-  VehicleAuction createAuction(int accountId, VehicleAuction auction) throws NotFoundException, AuctionException;
-  VehicleAuction startAuction(int accountId, VehicleAuction auction) throws NotFoundException, AuctionException;
+  VehicleAuction createAuction(int accountId, int vehicleId, VehicleAuction auction) throws NotFoundException, AuctionException;
+  VehicleAuction startAuction(int accountId, int auctionId) throws NotFoundException, AuctionException;
   VehicleAuction updateAuction(int accountIdBidder, int auctionId, AuctionBid auctionBid) throws AuctionException;
 }

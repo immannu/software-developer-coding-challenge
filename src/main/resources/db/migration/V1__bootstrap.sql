@@ -48,8 +48,8 @@ CREATE TABLE vehicle_account (
   vehicle_id int(11) NOT NULL,
   created_time timestamp NULL DEFAULT NULL,
   modified_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT account_id_vehicle_account FOREIGN KEY (account_id) REFERENCES account (id),
-  CONSTRAINT vehicle_id_vehicle_account FOREIGN KEY (vehicle_id) REFERENCES vehicle (id)
+  CONSTRAINT va_account_id FOREIGN KEY (account_id) REFERENCES account (id),
+  CONSTRAINT va_vehicle_id FOREIGN KEY (vehicle_id) REFERENCES vehicle (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 CREATE TABLE vehicle_auction (
@@ -64,13 +64,12 @@ CREATE TABLE vehicle_auction (
   auction_end_time timestamp NULL DEFAULT NULL,
   created_time timestamp NULL DEFAULT NULL,
   modified_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT account_id_auction FOREIGN KEY (account_id) REFERENCES account (id),
-  CONSTRAINT vehicle_id_auction FOREIGN KEY (vehicle_id) REFERENCES vehicle (id)
+  CONSTRAINT vau_account_id FOREIGN KEY (account_id) REFERENCES account (id),
+  CONSTRAINT vau_vehicle_id FOREIGN KEY (vehicle_id) REFERENCES vehicle (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 CREATE TABLE vehicle_auction_history (
   id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  account_id int(11) NOT NULL,
   vehicle_id int(11) NOT NULL,
   vehicle_auction_id int(11) NOT NULL,
   vin varchar(127) DEFAULT NULL,
@@ -78,10 +77,8 @@ CREATE TABLE vehicle_auction_history (
   auction_price int(11),
   created_time timestamp NULL DEFAULT NULL,
   modified_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT account_id_history FOREIGN KEY (account_id) REFERENCES account (id),
-  CONSTRAINT vehicle_id_history FOREIGN KEY (vehicle_id) REFERENCES vehicle (id),
-  CONSTRAINT vehicle_auction_id_history FOREIGN KEY (vehicle_auction_id) REFERENCES vehicle_auction (id),
-  CONSTRAINT vehicle_auction_id_history_vin FOREIGN KEY (vin) REFERENCES vehicle (vin),
+  CONSTRAINT vah_vehicle_id FOREIGN KEY (vehicle_id) REFERENCES vehicle (id),
+  CONSTRAINT vah_vehicle_auction_id FOREIGN KEY (vehicle_auction_id) REFERENCES vehicle_auction (id),
   KEY vin (vin)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 

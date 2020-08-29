@@ -6,9 +6,11 @@ import com.auction.TradeRevAuction.model.Account;
 import com.auction.TradeRevAuction.model.AuctionBid;
 import com.auction.TradeRevAuction.model.AuctionStatus;
 import com.auction.TradeRevAuction.model.Vehicle;
+import com.auction.TradeRevAuction.model.VehicleAccount;
 import com.auction.TradeRevAuction.model.VehicleAuction;
 import com.auction.TradeRevAuction.model.VehicleAuctionHistory;
 import com.auction.TradeRevAuction.repository.AccountRepository;
+import com.auction.TradeRevAuction.repository.VehicleAccountRepository;
 import com.auction.TradeRevAuction.repository.VehicleAuctionHistoryRepository;
 import com.auction.TradeRevAuction.repository.VehicleAuctionRepository;
 import com.auction.TradeRevAuction.repository.VehicleRepository;
@@ -16,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.util.function.Tuple2;
 
@@ -34,23 +37,38 @@ public class VehicleAuctionServiceImpl implements VehicleAuctionService {
 
   private final AccountRepository accountRepository;
   private final VehicleRepository vehicleRepository;
+  private final VehicleAccountRepository vehicleAccRepository;
   private final VehicleAuctionRepository vehicleAuctRepository;
   private final VehicleAuctionHistoryRepository vehicleAuctHistRepository;
 
-  public VehicleAuctionServiceImpl(AccountRepository accountRepository, VehicleRepository vehicleRepository, VehicleAuctionRepository vehicleAuctRepository, VehicleAuctionHistoryRepository vehicleAuctHistRepository) {
+  public VehicleAuctionServiceImpl(AccountRepository accountRepository, VehicleRepository vehicleRepository, VehicleAuctionRepository vehicleAuctRepository, VehicleAuctionHistoryRepository vehicleAuctHistRepository, VehicleAccountRepository vehicleAccRepository) {
     this.accountRepository = accountRepository;
     this.vehicleRepository = vehicleRepository;
     this.vehicleAuctRepository = vehicleAuctRepository;
     this.vehicleAuctHistRepository = vehicleAuctHistRepository;
+    this.vehicleAccRepository = vehicleAccRepository;
   }
 
   @Override
-  public VehicleAuction createAuction(int accountId, VehicleAuction auction) throws AuctionException {
-    Vehicle vehicle = auction.getAucVehicle();
-    validateAccountVehicle(accountId, vehicle);
+  @Transactional
+  public VehicleAuction createAuction(int accountId, int VehicleId, VehicleAuction auction) throws AuctionException {
+    Vehicle vehicle = this.vehicleRepository.getOne(VehicleId);
+    if(null == vehicle){
+      throw new AuctionException("Vehicle doesnt exist");
+    }
+
+    VehicleAccount vehicleAcc = this.vehicleAccRepository.findByVehicleId(VehicleId);
+//    Vehicle vehicle = vehicleValue.get();
+    validateAccountVehicle(accountId, vehicleAcc);
     validateVehicleTitle(vehicle);
     validateAuction(auction, AuctionStatus.NOT_STARTED );
     VehicleAuction newAuction = createAuction(vehicle, auction);
+    this.vehicleAuctRepository.save(newAuction);
+    this.vehicleAuctHistRepository.save(VehicleAuctionHistory.builder()
+                                        .vehAuc(newAuction)
+                                        .veh(vehicle)
+                                        .auctionPrice(newAuction.getBasePrice())
+                                        .basePrice(newAuction.getBasePrice()).build());
     return newAuction;
   }
 
@@ -61,7 +79,7 @@ public class VehicleAuctionServiceImpl implements VehicleAuctionService {
       throw new AuctionException("Invalid Auction Status, expected status  ${expected} but actual status is ${auction.getStatus()}");
     }
 
-    if(auction.getAuctionEndTime().before(auction.getAuctionStartTime())){
+    if(auction.getAuctionEndTime()!= null && auction.getAuctionEndTime().before(auction.getAuctionStartTime())){
       throw new AuctionException("Auction End time is earlier than Start");
     }
 
@@ -76,13 +94,16 @@ public class VehicleAuctionServiceImpl implements VehicleAuctionService {
   }
 
   private VehicleAuction createAuction(Vehicle vehicle, VehicleAuction auction){
-    return auction.toBuilder().aucVehicle(vehicle).basePrice(vehicle.getVehicleValue()).status(AuctionStatus.NOT_STARTED).build();
+    return auction.toBuilder().accountVal(vehicle.getVehicleAccount().getAccount())
+                              .aucVehicle(vehicle)
+                              .basePrice(vehicle.getVehicleValue())
+                              .status(AuctionStatus.NOT_STARTED).build();
   }
 
-  private void validateAccountVehicle(int accountId, Vehicle vehicle) throws AuctionException {
+  private void validateAccountVehicle(int accountId, VehicleAccount vehicleAcc) throws AuctionException {
 
     logger.info("Verifying whether vehicle with id : ${vehicle.getId()} belong to account  ${accountId}");
-    if(vehicle.getVehicleAccount().getAccount().getId() != accountId){
+    if(vehicleAcc.getAccount().getId() != accountId){
       throw new AuctionException("vehicle with id : ${vehicle.getId()} belong to account  ${accountId}");
     }
     logger.info("Verifying that vehicle with id : ${vehicle.getId()} belongs to account  ${accountId}");
@@ -96,9 +117,17 @@ public class VehicleAuctionServiceImpl implements VehicleAuctionService {
   }
 
   @Override
-  public VehicleAuction startAuction(int accountId, VehicleAuction auction) throws AuctionException {
+  public VehicleAuction startAuction(int accountId, int auctionId) throws AuctionException {
 
-    validateAccountVehicle(accountId, auction.getAucVehicle());
+    Optional<VehicleAuction> auc = this.vehicleAuctRepository.findById(auctionId);
+    if(!auc .isPresent()){
+      throw new AuctionException("Invalid Auction");
+    }
+
+    VehicleAuction auction = auc.get();
+
+    VehicleAccount vehicleAcc = this.vehicleAccRepository.findByVehicleId(auction.getAucVehicle().getId());
+    validateAccountVehicle(accountId, vehicleAcc);
     validateAuction(auction, AuctionStatus.NOT_STARTED );
     VehicleAuction newAuction = startAuction(auction);
     return newAuction;
@@ -110,12 +139,15 @@ public class VehicleAuctionServiceImpl implements VehicleAuctionService {
     int durationHrs = auction.getAuctionDurationHrs();
     Timestamp endTime = new Timestamp(startTime.getTime() + (1000 * 60 * 60 * durationHrs));
     this.vehicleAuctHistRepository.save(VehicleAuctionHistory.builder()
-                                  .acc(auction.getAccountVal())
+                                  //.acc(auction.getAccountVal())
                                   .basePrice(auction.getAucVehicle().getVehicleValue())
                                   .auctionPrice(auction.getAucVehicle().getVehicleValue())
                                   .vehAuc(auction).veh(auction.getAucVehicle()).build());
 
-    return auction.toBuilder().status(AuctionStatus.IN_PROGRESS).auctionEndTime(endTime).build();
+    VehicleAuction startAuction =  auction.toBuilder().status(AuctionStatus.IN_PROGRESS).auctionEndTime(endTime).build();
+    this.vehicleAuctRepository.save(startAuction);
+
+    return startAuction;
   }
 
   @Override
@@ -130,7 +162,7 @@ public class VehicleAuctionServiceImpl implements VehicleAuctionService {
       throw new AuctionException("Auction creater cant be Account Bidder");
     }
 
-    VehicleAuctionHistory lastValue = vehicleAuctHistRepository.getVehicleAuctionHistoryByVehAuc_IdOrderByAuctionPriceDesc(vehicle.getId());
+    VehicleAuctionHistory lastValue = vehicleAuctHistRepository.getLastVehicleAuction(vehicle.getId());
 
     if(lastValue.getAuctionPrice() >= auctionBid.getPrice()) {
       throw new AuctionException("Auction Bid price is lower than current bid price");
@@ -138,10 +170,9 @@ public class VehicleAuctionServiceImpl implements VehicleAuctionService {
     ReentrantLock lock = new ReentrantLock();
     lock.lock();
     try{
-      this.vehicleAuctHistRepository.save(lastValue.toBuilder()
-          .acc(account)
-          .auctionPrice(auctionBid.getPrice())
-          .build());
+      VehicleAuctionHistory newValue = VehicleAuctionHistory.builder().auctionPrice(auctionBid.getPrice())
+          .basePrice(lastValue.getBasePrice()).veh(lastValue.getVeh()).vehAuc(lastValue.getVehAuc()).build();
+      this.vehicleAuctHistRepository.save(newValue);
     }finally {
       lock.unlock();
     }
@@ -150,7 +181,7 @@ public class VehicleAuctionServiceImpl implements VehicleAuctionService {
   }
 
 
-  @Scheduled(fixedDelay = 60000)
+  //@Scheduled(fixedDelay = 60000)
   public void finishAuction(){
     Timestamp current = new Timestamp(System.currentTimeMillis());
     logger.info("running batch job to clean up all finished auction before ${current}");
@@ -182,7 +213,7 @@ public class VehicleAuctionServiceImpl implements VehicleAuctionService {
   }
 
   public Flux<List<VehicleAuctionHistory>> getAuctionHistory(List<VehicleAuctionHistory> auctions){
-    Flux<Long> interval = Flux.interval(Duration.ofSeconds(1));
+    Flux<Long> interval = Flux.interval(Duration.ofSeconds(3));
     interval.subscribe((i)-> auctions.forEach(auction -> getAuctionHistory(auction.getVehAuc())));
     Flux<List<VehicleAuctionHistory>> transactionFlux = Flux.fromStream(Stream.generate(() -> auctions));
 

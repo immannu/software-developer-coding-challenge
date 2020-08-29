@@ -1,6 +1,7 @@
 package com.auction.TradeRevAuction.controller;
 
 import com.auction.TradeRevAuction.Exception.AuctionException;
+import com.auction.TradeRevAuction.model.AuctionBid;
 import com.auction.TradeRevAuction.model.Vehicle;
 import com.auction.TradeRevAuction.model.VehicleAuction;
 import com.auction.TradeRevAuction.model.VehicleAuctionHistory;
@@ -29,15 +30,21 @@ public class VehicleAuctionController {
   @Autowired
   private VehicleService vehicleService;
 
-  @PostMapping("/accounts/{accId}/auction")
-  public VehicleAuction createAuction(@PathVariable(name = "accId") int accId, @RequestBody @Valid VehicleAuction auction) throws NotFoundException, AuctionException {
-    return vehicleAuctionService.createAuction(accId, auction);
+  @PostMapping("/accounts/{accId}/vehicle/{vId}/auction")
+  public VehicleAuction createAuction(@PathVariable(name = "accId") int accId, @PathVariable(name = "vId") int vId, @RequestBody @Valid VehicleAuction auction) throws NotFoundException, AuctionException {
+    return vehicleAuctionService.createAuction(accId, vId, auction);
   }
 
-  @PutMapping("/accounts/{accId}/auction")
-  public VehicleAuction startAuction(@PathVariable(name = "accId") int accId, @RequestBody @Valid VehicleAuction auction) throws NotFoundException, AuctionException {
+  @PutMapping("/accounts/{accId}/auction/{aucId}")
+  public VehicleAuction startAuction(@PathVariable(name = "accId") int accId, @PathVariable(name = "aucId") int aucId) throws NotFoundException, AuctionException {
 
-    return vehicleAuctionService.startAuction(accId, auction);
+    return vehicleAuctionService.startAuction(accId, aucId);
+  }
+
+  @PutMapping("/accounts/{accId}/auction/{aucId}/bid")
+  public VehicleAuction updateAuction(@PathVariable(name = "accId") int accId, @PathVariable(name = "aucId") int aucId, @RequestBody @Valid AuctionBid bid ) throws NotFoundException, AuctionException {
+
+    return vehicleAuctionService.updateAuction(accId,aucId,bid);
   }
 
   @GetMapping(value = "/accounts/{accId}/vehicle/{vId}/auction",produces = MediaType.TEXT_EVENT_STREAM_VALUE)

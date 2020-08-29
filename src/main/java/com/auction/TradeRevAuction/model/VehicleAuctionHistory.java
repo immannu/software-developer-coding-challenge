@@ -14,8 +14,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 
@@ -26,11 +28,11 @@ import javax.persistence.OneToOne;
 @Setter
 @ToString
 @Builder(toBuilder = true)
-@Entity(name ="vehicle_auction_hist0ry")
+@Entity(name ="vehicle_auction_history")
 public class VehicleAuctionHistory extends BaseEnity{
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", updatable = false, nullable = false)
   private int id;
 
@@ -50,17 +52,12 @@ public class VehicleAuctionHistory extends BaseEnity{
   private int auctionPrice;
 
   @OneToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "account_id", nullable = true)
-  @JsonIgnore
-  private Account acc;
-
-  @OneToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "vehicle_id", nullable = true)
+  @JoinColumn(name = "vehicle_id", nullable = false)
   @JsonIgnore
   private Vehicle veh;
 
-  @OneToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "vehicle_auction_id", nullable = true)
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  @JoinColumn(name = "vehicle_auction_id", nullable = false)
   @JsonIgnore
   private VehicleAuction vehAuc;
 }

@@ -42,12 +42,12 @@ public class VehicleAccount extends BaseEnity implements Serializable {
 //  private int vehicleId;
 
   @OneToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "account_id", nullable = true)
+  @JoinColumn(name = "account_id", nullable = false)
   @JsonIgnore
   private Account account;
 
   @OneToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "vehicle_id", nullable = true)
+  @JoinColumn(name = "vehicle_id", nullable = false)
   @JsonIgnore
   private Vehicle vehicle;
 

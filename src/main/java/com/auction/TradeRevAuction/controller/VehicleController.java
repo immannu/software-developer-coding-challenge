@@ -36,7 +36,7 @@ public class VehicleController {
   }
 
   @PostMapping ("/accounts/{acId}/vehicle")
-  public Vehicle createAccount(@PathVariable(name = "acId") int acId, @RequestBody @Valid Vehicle vehicle) throws NotFoundException {
+  public Vehicle addVehicle(@PathVariable(name = "acId") int acId, @RequestBody @Valid Vehicle vehicle) throws NotFoundException {
 
     return vehicleService.addVehicle(acId, vehicle);
   }

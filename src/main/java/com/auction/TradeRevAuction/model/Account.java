@@ -29,7 +29,7 @@ import javax.persistence.OneToOne;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"vehicles", "vehicleAuctions"})
 @Builder(toBuilder = true)
 @Entity(name ="account")
 public class Account extends BaseEnity implements Serializable {
@@ -73,10 +73,5 @@ public class Account extends BaseEnity implements Serializable {
   @JsonIgnore
   private List<VehicleAuction> vehicleAuctions;
 
-  @OneToMany(fetch = FetchType.LAZY,
-      cascade =  CascadeType.ALL,
-      mappedBy = "acc",orphanRemoval = true)
-  @JsonIgnore
-  private List<VehicleAuctionHistory> vehicleAuctionHistories;
 
 }
