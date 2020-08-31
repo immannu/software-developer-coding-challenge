@@ -4,6 +4,8 @@ import com.auction.TradeRevAuction.model.Account;
 import com.auction.TradeRevAuction.service.AccountServiceImpl;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,9 +32,9 @@ public class AccountController {
   }
 
   @GetMapping("/accounts/{id}")
-  public Account getAccount(@PathVariable(name = "id") int id) throws NotFoundException {
+  public ResponseEntity<Account> getAccount(@PathVariable(name = "id") int id) throws NotFoundException {
 
-    return accountService.get(id);
+    return new ResponseEntity(accountService.get(id), HttpStatus.OK);
   }
 
   @PostMapping ("/accounts")

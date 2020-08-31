@@ -2,11 +2,8 @@ package com.auction.TradeRevAuction.service;
 
 import com.auction.TradeRevAuction.Exception.AuctionException;
 import com.auction.TradeRevAuction.model.AuctionBid;
-import com.auction.TradeRevAuction.model.Vehicle;
 import com.auction.TradeRevAuction.model.VehicleAuction;
 import javassist.NotFoundException;
-
-import java.util.List;
 
 public interface VehicleAuctionService {
 

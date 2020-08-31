@@ -35,12 +35,6 @@ public class VehicleAccount extends BaseEnity implements Serializable {
   @Column(name = "id", updatable = false, nullable = false)
   private int id;
 
-//  @Column(name = "account_id",insertable = false,updatable = false)
-//  private int accountId;
-//
-//  @Column(name = "vehicle_id",insertable = false,updatable = false)
-//  private int vehicleId;
-
   @OneToOne(fetch = FetchType.LAZY, optional = true)
   @JoinColumn(name = "account_id", nullable = false)
   @JsonIgnore

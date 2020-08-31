@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Repository
 @Transactional
 public interface VehicleAuctionHistoryRepository extends JpaRepository<VehicleAuctionHistory, Integer> {
@@ -15,5 +17,11 @@ public interface VehicleAuctionHistoryRepository extends JpaRepository<VehicleAu
 
   @Query(value = "Select vah.* from vehicle_auction_history  vah inner join vehicle_auction va on vah.vehicle_auction_id= va.id  where vah.vehicle_id =:vehicleId order by vah.auction_price desc LIMIT 1", nativeQuery = true)
   VehicleAuctionHistory getLastVehicleAuction(@Param("vehicleId") int vehicleId);
+
+  @Query(value = "Select vah.* from vehicle_auction_history  vah where vah.vehicle_id =:vehicleId order by vah.auction_price desc LIMIT :count", nativeQuery = true)
+  List<VehicleAuctionHistory> getLastFewVehicleAuctionHistory(int vehicleId, int count);
+
+  @Query(value = "Select vah.* from vehicle_auction_history  vah where vah.vehicle_id =:vehicleId order by vah.auction_price desc ", nativeQuery = true)
+  List<VehicleAuctionHistory> getAllVehicleAuctionHistory(int vehicleId);
 
 }

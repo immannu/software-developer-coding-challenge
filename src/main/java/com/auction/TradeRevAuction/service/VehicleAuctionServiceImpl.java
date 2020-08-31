@@ -24,7 +24,10 @@ import reactor.util.function.Tuple2;
 
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
@@ -181,7 +184,7 @@ public class VehicleAuctionServiceImpl implements VehicleAuctionService {
   }
 
 
-  //@Scheduled(fixedDelay = 60000)
+  @Scheduled(fixedDelay = 60000)
   public void finishAuction(){
     Timestamp current = new Timestamp(System.currentTimeMillis());
     logger.info("running batch job to clean up all finished auction before ${current}");
@@ -208,20 +211,52 @@ public class VehicleAuctionServiceImpl implements VehicleAuctionService {
       throw new AuctionException("no Valid Auction Present");
     }
 
-    return getAuctionHistory(vehicleAuction.get().getVehicleAuctionHistories());
+    return getAuctionHistory(vehicleAuction.get().getAucVehicle().getId());
 
   }
 
-  public Flux<List<VehicleAuctionHistory>> getAuctionHistory(List<VehicleAuctionHistory> auctions){
+  public List<VehicleAuctionHistory> getAllVehicleAuctionHistory(int vehicleId) throws AuctionException{
+    Optional<Vehicle> vehicle = vehicleRepository.findById(vehicleId);
+
+    if(!vehicle.isPresent()){
+      throw new AuctionException("no Valid  Vehicle Present");
+    }
+    Optional<VehicleAuction> vehicleAuction = vehicleAuctRepository.findByAucVehicle_Id(vehicleId);
+
+    if(!vehicleAuction.isPresent()){
+      throw new AuctionException("no Valid Auction Present");
+    }
+
+    return getAllAuctionHistoryToList(vehicleAuction.get().getAucVehicle().getId());
+
+  }
+
+  public Flux<List<VehicleAuctionHistory>> getAuctionHistory(int vehicleID){
+    final Map<Integer,List<VehicleAuctionHistory>> map = new HashMap<>();
+    map.put(vehicleID, new ArrayList<>());
     Flux<Long> interval = Flux.interval(Duration.ofSeconds(3));
-    interval.subscribe((i)-> auctions.forEach(auction -> getAuctionHistory(auction.getVehAuc())));
-    Flux<List<VehicleAuctionHistory>> transactionFlux = Flux.fromStream(Stream.generate(() -> auctions));
+    interval.subscribe((i)-> {
+      List<VehicleAuctionHistory> currentHist = getAuctionHistoryToList(vehicleID);
+      map.put(vehicleID, currentHist);
+    });
+
+    Flux<List<VehicleAuctionHistory>> transactionFlux = Flux.fromStream(Stream.generate(() -> map.get(vehicleID)));
 
     return Flux.zip(interval, transactionFlux).map(Tuple2::getT2);
 
   }
 
-  private VehicleAuctionHistory getAuctionHistory(VehicleAuction auction){
-    return vehicleAuctHistRepository.getVehicleAuctionHistoryByVehAuc_Id(auction.getAucVehicle().getId());
+  private List<VehicleAuctionHistory> getAuctionHistoryToList(int vehicleId){
+
+    List<VehicleAuctionHistory> result= vehicleAuctHistRepository.getLastFewVehicleAuctionHistory(vehicleId, 4);
+
+    return result;
+  }
+
+  private List<VehicleAuctionHistory> getAllAuctionHistoryToList(int vehicleId){
+
+    List<VehicleAuctionHistory> result= vehicleAuctHistRepository.getAllVehicleAuctionHistory(vehicleId);
+
+    return result;
   }
 }

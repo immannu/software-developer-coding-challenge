@@ -1,7 +1,6 @@
 package com.auction.TradeRevAuction.repository;
 
 import com.auction.TradeRevAuction.model.Vehicle;
-import com.auction.TradeRevAuction.model.VehicleAccount;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
